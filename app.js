@@ -14,7 +14,7 @@ const HTTP_STATUS = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   PAYLOAD_TOO_LARGE: 413,
-  INTERNAL_SERVER_ERROR: 500
+  INTERNAL_SERVER_ERROR: 500,
 };
 
 /*
@@ -25,13 +25,13 @@ const REGISTER_ERROR_STATUS = {
   INVALID_TYPE: HTTP_STATUS.BAD_REQUEST,
   EMPTY_FIELD: HTTP_STATUS.BAD_REQUEST,
   PASSWORD_TOO_SHORT: HTTP_STATUS.BAD_REQUEST,
-  USERNAME_TAKEN: HTTP_STATUS.CONFLICT
+  USERNAME_TAKEN: HTTP_STATUS.CONFLICT,
 };
 
 const LOGIN_ERROR_STATUS = {
   INVALID_TYPE: HTTP_STATUS.BAD_REQUEST,
   EMPTY_FIELD: HTTP_STATUS.BAD_REQUEST,
-  INVALID_CREDENTIALS: HTTP_STATUS.UNAUTHORIZED
+  INVALID_CREDENTIALS: HTTP_STATUS.UNAUTHORIZED,
 };
 
 const REGISTER_SUCCESS_MESSAGE = "Đăng ký thành công";
@@ -61,7 +61,7 @@ function sendSuccess(res, status, message, user) {
   return res.status(status).json({
     success: true,
     message,
-    user: removeSensitiveFields(user)
+    user: removeSensitiveFields(user),
   });
 }
 
@@ -77,7 +77,7 @@ function sendServerError(res, error) {
     res,
     HTTP_STATUS.INTERNAL_SERVER_ERROR,
     "SERVER_ERROR",
-    SERVER_ERROR_MESSAGE
+    SERVER_ERROR_MESSAGE,
   );
 }
 
@@ -86,14 +86,41 @@ function sendServerError(res, error) {
  * - result.success === true -> trả successStatus + message thành công + user.
  * - result.success === false -> tra mã HTTP theo result.code; code lạ -> 500.
  */
-function sendServiceResult(res, result, successStatus, successMessage, errorStatusByCode) {
-  if (result && result.success === true) {
+function sendServiceResult(
+  res,
+  result,
+  successStatus,
+  successMessage,
+  errorStatusByCode,
+) {
+  // Kiểm tra kết quả trả về từ authService
+  if (!result || typeof result !== "object") {
+    return sendServerError(
+      res,
+      new Error("authService trả về dữ liệu không hợp lệ"),
+    );
+  }
+
+  // Xử lý đăng ký hoặc đăng nhập thành công
+  if (result.success === true) {
+    if (!result.user || typeof result.user !== "object") {
+      return sendServerError(
+        res,
+        new Error("authService không trả về thông tin user hợp lệ"),
+      );
+    }
+
     return sendSuccess(res, successStatus, successMessage, result.user);
   }
 
-  const status = result && errorStatusByCode[result.code];
+  // Xử lý các lỗi đã được định nghĩa
+  const status = errorStatusByCode[result.code];
+
   if (!status) {
-    return sendServerError(res, new Error("authService trả kết quả không xác định"));
+    return sendServerError(
+      res,
+      new Error("authService trả kết quả không xác định"),
+    );
   }
 
   return sendError(res, status, result.code, result.message);
@@ -111,7 +138,7 @@ app.post("/api/auth/register", async (req, res) => {
       result,
       HTTP_STATUS.CREATED,
       REGISTER_SUCCESS_MESSAGE,
-      REGISTER_ERROR_STATUS
+      REGISTER_ERROR_STATUS,
     );
   } catch (error) {
     return sendServerError(res, error);
@@ -130,7 +157,7 @@ app.post("/api/auth/login", async (req, res) => {
       result,
       HTTP_STATUS.OK,
       LOGIN_SUCCESS_MESSAGE,
-      LOGIN_ERROR_STATUS
+      LOGIN_ERROR_STATUS,
     );
   } catch (error) {
     return sendServerError(res, error);
@@ -146,7 +173,12 @@ app.use((req, res) => {
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
   if (error.type === "entity.parse.failed") {
-    return sendError(res, HTTP_STATUS.BAD_REQUEST, "INVALID_JSON", INVALID_JSON_MESSAGE);
+    return sendError(
+      res,
+      HTTP_STATUS.BAD_REQUEST,
+      "INVALID_JSON",
+      INVALID_JSON_MESSAGE,
+    );
   }
 
   if (error.type === "entity.too.large") {
@@ -154,7 +186,7 @@ app.use((error, req, res, next) => {
       res,
       HTTP_STATUS.PAYLOAD_TOO_LARGE,
       "PAYLOAD_TOO_LARGE",
-      PAYLOAD_TOO_LARGE_MESSAGE
+      PAYLOAD_TOO_LARGE_MESSAGE,
     );
   }
 

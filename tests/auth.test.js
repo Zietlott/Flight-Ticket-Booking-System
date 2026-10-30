@@ -4,7 +4,7 @@ const os = require("os");
 const path = require("path");
 
 const testDirectory = fs.mkdtempSync(
-  path.join(os.tmpdir(), "lab08-auth-tests-")
+  path.join(os.tmpdir(), "lab08-auth-tests-"),
 );
 
 const previousUsersFile = process.env.USERS_FILE;
@@ -14,7 +14,7 @@ const app = require("../app");
 
 const validUser = {
   username: "testuser",
-  password: "Password123"
+  password: "Password123",
 };
 
 beforeEach(() => {
@@ -45,9 +45,7 @@ describe("Authentication API", () => {
   });
 
   test("TC02 - Reject duplicate username", async () => {
-    await request(app)
-      .post("/api/auth/register")
-      .send(validUser);
+    await request(app).post("/api/auth/register").send(validUser);
 
     const response = await request(app)
       .post("/api/auth/register")
@@ -59,13 +57,9 @@ describe("Authentication API", () => {
   });
 
   test("TC03 - Login successfully", async () => {
-    await request(app)
-      .post("/api/auth/register")
-      .send(validUser);
+    await request(app).post("/api/auth/register").send(validUser);
 
-    const response = await request(app)
-      .post("/api/auth/login")
-      .send(validUser);
+    const response = await request(app).post("/api/auth/login").send(validUser);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.success).toBe(true);
@@ -73,53 +67,54 @@ describe("Authentication API", () => {
   });
 
   test("TC04 - Reject incorrect password", async () => {
-    await request(app)
-      .post("/api/auth/register")
-      .send(validUser);
+    await request(app).post("/api/auth/register").send(validUser);
 
-    const response = await request(app)
-      .post("/api/auth/login")
-      .send({
-        username: "testuser",
-        password: "WrongPassword123"
-      });
+    const response = await request(app).post("/api/auth/login").send({
+      username: "testuser",
+      password: "WrongPassword123",
+    });
 
     expect(response.statusCode).toBe(401);
     expect(response.body.code).toBe("INVALID_CREDENTIALS");
   });
 
   test("TC05 - Reject short password", async () => {
-    const response = await request(app)
-      .post("/api/auth/register")
-      .send({
-        username: "testuser",
-        password: "123"
-      });
+    const response = await request(app).post("/api/auth/register").send({
+      username: "testuser",
+      password: "123",
+    });
 
     expect(response.statusCode).toBe(400);
     expect(response.body.code).toBe("PASSWORD_TOO_SHORT");
   });
 
   test("TC06 - Reject empty username", async () => {
-    const response = await request(app)
-      .post("/api/auth/register")
-      .send({
-        username: "",
-        password: "Password123"
-      });
+    const response = await request(app).post("/api/auth/register").send({
+      username: "",
+      password: "Password123",
+    });
 
     expect(response.statusCode).toBe(400);
     expect(response.body.code).toBe("EMPTY_FIELD");
   });
 
   test("TC07 - Reject missing password", async () => {
-    const response = await request(app)
-      .post("/api/auth/register")
-      .send({
-        username: "testuser"
-      });
+    const response = await request(app).post("/api/auth/register").send({
+      username: "testuser",
+    });
 
     expect(response.statusCode).toBe(400);
     expect(response.body.code).toBe("INVALID_TYPE");
+  });
+
+  test("TC08 - Reject username containing only spaces", async () => {
+    const response = await request(app).post("/api/auth/register").send({
+      username: "   ",
+      password: "Password123",
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.code).toBe("EMPTY_FIELD");
   });
 });
