@@ -1,46 +1,69 @@
 
-# Lab09 - Booking & Passenger Test Cases
+# Lab09 - Booking & Passenger Test Report
 
 ## Thành viên phụ trách: TV3
 
-Module: Booking & Passenger
+- Module: Booking & Passenger
+- Loại kiểm thử: Unit Test
+- Framework: Jest
+- Nguồn mã kiểm thử: origin/feature/lab09-integration
+- File nghiệp vụ: services/bookingService.js
+- File kiểm thử: tests/booking.test.js
 
-Loại kiểm thử dự kiến: Unit Test
+## 1. Kết quả kiểm thử
 
-## Danh sách Test Case
+| ID | Test Case | Status |
+|---|---|---|
+| BK01 | Đặt vé với thông tin hợp lệ | PASS |
+| BK02 | Thiếu họ tên hành khách | PASS |
+| BK03 | Thiếu số hộ chiếu | PASS |
+| BK04 | Số hộ chiếu sai định dạng | PASS |
+| BK05 | Chuyến bay hết chỗ | PASS |
+| BK06 | Danh sách hành khách rỗng | PASS |
+| BK07 | Chuẩn hóa thông tin hành khách hợp lệ | PASS |
+| BK08 | Đặt vé khi còn đúng một chỗ | PASS |
+| BK09 | Số hành khách vượt số ghế còn lại | PASS |
+| BK10 | Tính tổng tiền cho nhiều hành khách | PASS |
+| BK11 | Giá chuyến bay không hợp lệ | PASS |
+| BK12 | Kiểu dữ liệu hành khách không hợp lệ | PASS |
 
-| ID | Test Case | Expected Result | Status |
-|---|---|---|---|
-| BK01 | Đặt vé với thông tin hợp lệ | Cho phép đặt vé | BLOCKED |
-| BK02 | Thiếu họ tên hành khách | Báo lỗi | BLOCKED |
-| BK03 | Thiếu giấy tờ tùy thân | Báo lỗi | BLOCKED |
-| BK04 | Định dạng giấy tờ không hợp lệ | Báo lỗi | BLOCKED |
-| BK05 | Chuyến bay hết chỗ | Từ chối đặt vé | BLOCKED |
-| BK06 | Số lượng hành khách không hợp lệ | Báo lỗi | BLOCKED |
-| BK07 | Thông tin hành khách hợp lệ | Chấp nhận dữ liệu | BLOCKED |
-| BK08 | Chuyến bay còn đúng một chỗ | Xử lý theo quy tắc hệ thống | BLOCKED |
+## 2. Tổng hợp kết quả
 
-## Kết quả
-
-- Tổng số test case: 8
-- PASS: 0
+- Tổng số Test Case: 12
+- PASS: 12
 - FAIL: 0
-- BLOCKED: 8
+- BLOCKED: 0
+- Test Suites: 1 passed
 
-## Nguyên nhân BLOCKED
+## 3. Code Coverage
 
-Chưa tìm thấy mã nguồn xử lý Booking & Passenger trên
-branch dev hoặc feature/booking.
+| Metric | Coverage |
+|---|---|
+| Statements | 91.17% |
+| Branches | 92.85% |
+| Functions | 100% |
+| Lines | 91.17% |
 
-Các thư mục backend hiện chỉ chứa cấu trúc ban đầu,
-chưa có các hàm nghiệp vụ để thực hiện Unit Test.
+Các dòng chưa được bao phủ: 35, 40, 48
+trong services/bookingService.js.
 
-## Hướng xử lý
+## 4. Lệnh thực thi
 
-Khi module Booking & Passenger được triển khai:
-1. Xác định các hàm nghiệp vụ thực tế.
-2. Xây dựng dữ liệu kiểm thử.
-3. Viết Unit Test bằng Jest.
-4. Thực thi BK01-BK08.
-5. Chạy Code Coverage.
-6. Cập nhật kết quả PASS/FAIL.
+npm test -- --coverage --runInBand \
+  --modulePathIgnorePatterns='<rootDir>/backend/' \
+  --runTestsByPath tests/booking.test.js \
+  --collectCoverageFrom=services/bookingService.js
+
+## 5. Kết luận
+
+Đã thực thi thành công 12 Unit Test cho
+Booking & Passenger Service.
+
+Tất cả Test Case BK01-BK12 đều PASS.
+
+Code Coverage đạt 91.17% Statements,
+92.85% Branches, 100% Functions và
+91.17% Lines.
+
+Kết quả được xác nhận trên mã nguồn của
+branch feature/lab09-integration.
