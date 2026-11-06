@@ -117,4 +117,69 @@ describe("Authentication API", () => {
     expect(response.body.success).toBe(false);
     expect(response.body.code).toBe("EMPTY_FIELD");
   });
+
+  test("TC09 - Normalize username whitespace and letter case", async () => {
+    const registration = await request(app)
+      .post("/api/auth/register")
+      .send({ username: " TestUser ", password: "Password123" });
+    const login = await request(app)
+      .post("/api/auth/login")
+      .send({ username: "TESTUSER", password: "Password123" });
+
+    expect(registration.body.user.username).toBe("testuser");
+    expect(login.statusCode).toBe(200);
+  });
+
+  test("TC10 - Reject registration without a username", async () => {
+    const response = await request(app)
+      .post("/api/auth/register")
+      .send({ password: "Password123" });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("INVALID_TYPE");
+  });
+
+  test("TC11 - Reject credentials with an invalid data type", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({ username: ["testuser"], password: "Password123" });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("INVALID_TYPE");
+  });
+
+  test("TC12 - Reject login for a username that does not exist", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({ username: "unknown", password: "Password123" });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.code).toBe("INVALID_CREDENTIALS");
+  });
+
+  test("TC13 - Reject malformed JSON", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .set("Content-Type", "application/json")
+      .send('{"username":');
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("INVALID_JSON");
+  });
+
+  test("TC14 - Reject a request body larger than 10 KB", async () => {
+    const response = await request(app)
+      .post("/api/auth/register")
+      .send({ username: "testuser", password: "x".repeat(11 * 1024) });
+
+    expect(response.statusCode).toBe(413);
+    expect(response.body.code).toBe("PAYLOAD_TOO_LARGE");
+  });
+
+  test("TC15 - Return not found for an unknown endpoint", async () => {
+    const response = await request(app).get("/api/unknown");
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body.code).toBe("NOT_FOUND");
+  });
 });
